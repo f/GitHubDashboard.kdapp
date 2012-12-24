@@ -1,8 +1,8 @@
-{Settings}            = GitHub
-{Connector, Storage}  = GitHub.Core
-{Repo}                = GitHub.Models
+{Settings}                  = GitHub
+{Connector, Storage, CLI}   = GitHub.Core
+{Repo}                      = GitHub.Models
 
-{notify}              = GitHub.Core.Utils
+{notify}                    = GitHub.Core.Utils
 
 class GitHub.Views.RepoView extends KDListItemView
 
@@ -84,7 +84,7 @@ class GitHub.Views.MainView extends JView
         
     @repoListView = @repoList.getView()
     
-    # Field View
+    # Username View
     @usernameField = new KDInputView
       placeholder     : "Write a GitHub username."
       defaultValue    : nickname
@@ -95,6 +95,22 @@ class GitHub.Views.MainView extends JView
     
     @usernameField.on "ValidationError",  => do @usernameButton.disable
     @usernameField.on "ValidationPassed", => do @usernameButton.enable
+    
+    # Clone URL View
+    @cloneUrlField = new KDInputView
+      placeholder     : "clone url."
+      validate        :
+        event         : "keyup"
+        rules         :
+          required    : yes
+    
+    @cloneUrlField.on "ValidationError",  => 
+      do @cloneUrlButton.disable
+      do @cloneUrlAppButton.disable
+      
+    @cloneUrlField.on "ValidationPassed", => 
+      do @cloneUrlButton.enable
+      do @cloneUrlAppButton.enable
     
     # Button View
     @usernameButton = new KDButtonView
@@ -121,11 +137,21 @@ class GitHub.Views.MainView extends JView
           notify "Something wrong..."
           @usernameButton.hideLoader()
         , Settings.requestTimeout
-    
+        
+    # Button View
+    @cloneUrlButton = new KDButtonView
+      title       : "Clone URL"
+      loader      :
+        color   : "#000"
+        diameter: 16
+      callback    :=>
+        
   pistachio: ->
     """
     {{> @header}}
     {{> @usernameField}}{{> @usernameButton}}
+    <hr>
+    {{> @cloneUrlField}}
     <hr>
     {{> @repoListView}}
     """

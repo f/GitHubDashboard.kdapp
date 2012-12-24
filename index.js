@@ -1,4 +1,4 @@
-// Compiled by Koding Servers at Mon Dec 24 2012 11:33:19 GMT-0800 (PST) in server time
+// Compiled by Koding Servers at Mon Dec 24 2012 11:50:58 GMT-0800 (PST) in server time
 
 (function() {
 
@@ -191,13 +191,13 @@ GitHub.Models.Repo = (function() {
 
 /* BLOCK STARTS /Source: /Users/fkadev/Applications/GitHubDashboard.kdapp/app/views.coffee */
 
-var Connector, Repo, Settings, Storage, notify, _ref,
+var CLI, Connector, Repo, Settings, Storage, notify, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 Settings = GitHub.Settings;
 
-_ref = GitHub.Core, Connector = _ref.Connector, Storage = _ref.Storage;
+_ref = GitHub.Core, Connector = _ref.Connector, Storage = _ref.Storage, CLI = _ref.CLI;
 
 Repo = GitHub.Models.Repo;
 
@@ -325,7 +325,24 @@ GitHub.Views.MainView = (function(_super) {
     this.usernameField.on("ValidationPassed", function() {
       return _this.usernameButton.enable();
     });
-    return this.usernameButton = new KDButtonView({
+    this.cloneUrlField = new KDInputView({
+      placeholder: "clone url.",
+      validate: {
+        event: "keyup",
+        rules: {
+          required: true
+        }
+      }
+    });
+    this.cloneUrlField.on("ValidationError", function() {
+      _this.cloneUrlButton.disable();
+      return _this.cloneUrlAppButton.disable();
+    });
+    this.cloneUrlField.on("ValidationPassed", function() {
+      _this.cloneUrlButton.enable();
+      return _this.cloneUrlAppButton.enable();
+    });
+    this.usernameButton = new KDButtonView({
       title: "Get User Repositories",
       loader: {
         color: "#000",
@@ -352,10 +369,18 @@ GitHub.Views.MainView = (function(_super) {
         }, Settings.requestTimeout);
       }
     });
+    return this.cloneUrlButton = new KDButtonView({
+      title: "Clone URL",
+      loader: {
+        color: "#000",
+        diameter: 16
+      },
+      callback: function() {}
+    });
   };
 
   MainView.prototype.pistachio = function() {
-    return "{{> this.header}}\n{{> this.usernameField}}{{> this.usernameButton}}\n<hr>\n{{> this.repoListView}}";
+    return "{{> this.header}}\n{{> this.usernameField}}{{> this.usernameButton}}\n<hr>\n{{> this.cloneUrlField}}\n<hr>\n{{> this.repoListView}}";
   };
 
   MainView.prototype.viewAppended = function() {
