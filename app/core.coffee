@@ -57,15 +57,26 @@ class GitHub.Core.CLI
   @getSingleton: => @instance ?= new @
 
   constructor: ()->
-    @kite = KD.getSingleton "kiteController"
+    @kite   = KD.getSingleton "kiteController"
+    @finder = KD.getSingleton "finderController"
+    @tree   = @finder.treeController
 
   clone: (url, name, callback)->
-    path = "/Users/#{nickname}/GitHub/#{name}"
-    @kite.run "mkdir -p #{path}; git clone #{url} #{path}", callback
+    root = "/Users/#{nickname}/GitHub"
+    path = "#{root}/#{name}"
+    
+    @kite.run "mkdir -p #{path}; git clone #{url} #{path}", =>
+      KD.utils.wait 200, => 
+        @tree.refreshFolder @tree.nodes[root]
+      do callback
 
   cloneAsApp: (url, name, callback)->
     # Clear the repo name.
     name = name.replace(/.kdapp$/, '')
+    root = "/Users/#{nickname}/Applications"
+    path = "#{root}/#{name}.kdapp"
     
-    path = "/Users/#{nickname}/Applications/#{name}.kdapp"
-    @kite.run "mkdir -p #{path}; git clone #{url} #{path}", callback
+    @kite.run "mkdir -p #{path}; git clone #{url} #{path}", =>
+      KD.utils.wait 200, => 
+        @tree.refreshFolder @tree.nodes[root]
+      do callback

@@ -39,7 +39,7 @@ class GitHub.Views.RepoView extends KDListItemView
 class GitHub.Views.ReposView extends KDListViewController
 
   # Empty repos
-  repos: [],
+  repos: []
 
   resetRepos: (repos, data = {})->
     @repos = []
@@ -150,8 +150,6 @@ class GitHub.Views.MainView extends JView
     """
     {{> @header}}
     {{> @usernameField}}{{> @usernameButton}}
-    <hr>
-    {{> @cloneUrlField}}
     <hr>
     {{> @repoListView}}
     """

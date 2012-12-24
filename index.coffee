@@ -1,5 +1,6 @@
 {Settings}  = GitHub
 {MainView}  = GitHub.Views
+{notify}    = GitHub.Core.Utils
     
 do ->
   try
