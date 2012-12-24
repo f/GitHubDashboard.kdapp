@@ -13,6 +13,7 @@
     "blocks": {
       "app": {
         "files": [
+          "./app/settings.coffee",
           "./app/core.coffee",
           "./app/models.coffee",
           "./app/views.coffee",

@@ -1,2 +1,10 @@
+{Settings}  = GitHub
+{MainView}  = GitHub.Views
+    
 do ->
-    appView.addSubView new GitHub.Views.MainView
+  try
+    appView.addSubView new MainView
+      # The Main Namespace
+      cssClass: Settings.baseViewClass
+  catch error
+    notify error

@@ -1,14 +1,19 @@
-// Compiled by Koding Servers at Sun Dec 23 2012 22:53:03 GMT-0800 (PST) in server time
+// Compiled by Koding Servers at Mon Dec 24 2012 04:58:09 GMT-0800 (PST) in server time
 
 (function() {
 
 /* KDAPP STARTS */
 
-/* BLOCK STARTS /Source: /Users/fkadev/Applications/GitHubDashboard.kdapp/app/core.coffee */
+/* BLOCK STARTS /Source: /Users/fkadev/Applications/GitHubDashboard.kdapp/app/settings.coffee */
 
-var GitHub, nickname;
+var GitHub;
 
 GitHub = {
+  Settings: {
+    baseViewClass: 'github-dahsboard',
+    appStorageName: 'github-dahsboard',
+    requestTimeout: 15000
+  },
   Core: {
     Connector: null,
     CLI: null
@@ -23,7 +28,41 @@ GitHub = {
   }
 };
 
+
+/* BLOCK ENDS */
+
+
+
+/* BLOCK STARTS /Source: /Users/fkadev/Applications/GitHubDashboard.kdapp/app/core.coffee */
+
+var Settings, nickname;
+
+Settings = GitHub.Settings;
+
 nickname = KD.whoami().profile.nickname;
+
+GitHub.Core.Storage = (function() {
+
+  Storage.getSingleton = function() {
+    var _ref;
+    return (_ref = Storage.instance) != null ? _ref : Storage.instance = new Storage;
+  };
+
+  function Storage() {
+    this.store = new AppStorage(Settings.appStorageName, "0.1");
+  }
+
+  Storage.prototype.set = function(key, value) {
+    return this.store.setValue(key, value);
+  };
+
+  Storage.prototype.get = function(key, callback) {
+    return this.store.getValue(key, callback);
+  };
+
+  return Storage;
+
+}).call(this);
 
 GitHub.Core.Connector = (function() {
 
@@ -70,6 +109,11 @@ GitHub.Core.Connector = (function() {
 
 GitHub.Core.CLI = (function() {
 
+  CLI.getSingleton = function() {
+    var _ref;
+    return (_ref = CLI.instance) != null ? _ref : CLI.instance = new CLI;
+  };
+
   function CLI() {
     this.kite = KD.getSingleton("kiteController");
   }
@@ -82,11 +126,26 @@ GitHub.Core.CLI = (function() {
 
   CLI.prototype.cloneAsApp = function(url, name, callback) {
     var path;
+    name = name.replace(/.kdapp$/, '');
     path = "/Users/" + nickname + "/Applications/" + name + ".kdapp";
     return this.kite.run("mkdir -p " + path + "; git clone " + url + " " + path, callback);
   };
 
   return CLI;
+
+}).call(this);
+
+GitHub.Core.Utils = (function() {
+
+  function Utils() {}
+
+  Utils.notify = function(message) {
+    return new KDNotificationView({
+      title: message
+    });
+  };
+
+  return Utils;
 
 })();
 
@@ -105,7 +164,7 @@ GitHub.Models.Repo = (function() {
 
   function Repo(data) {
     this.data = data;
-    this.cli = new CLI;
+    this.cli = CLI.getSingleton();
   }
 
   Repo.prototype.clone = function(callback) {
@@ -127,47 +186,52 @@ GitHub.Models.Repo = (function() {
 
 /* BLOCK STARTS /Source: /Users/fkadev/Applications/GitHubDashboard.kdapp/app/views.coffee */
 
-var Connector, GITHUB_TIMEOUT, Repo,
+var Connector, Repo, Settings, Storage, notify, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-Connector = GitHub.Core.Connector;
+Settings = GitHub.Settings;
+
+_ref = GitHub.Core, Connector = _ref.Connector, Storage = _ref.Storage;
 
 Repo = GitHub.Models.Repo;
 
-GITHUB_TIMEOUT = 15000;
+notify = GitHub.Core.Utils.notify;
 
 GitHub.Views.RepoView = (function(_super) {
 
   __extends(RepoView, _super);
 
-  function RepoView() {
-    RepoView.__super__.constructor.apply(this, arguments);
+  function RepoView(model) {
+    this.model = model;
+    alert(JSON.stringify(this.getData()));
   }
 
-  RepoView.prototype.partial = function(data) {
-    return "" + data.name + " - " + data.clone_url + " \n<a class='clone' href='#'>Clone</a> - <a class='clone-app' href='#'>Clone as Koding App</a>";
-  };
+  /*
+    click: (e)->
+      alert 1
+      no
+      model = new Repo @getData()
+  
+      if e.target.className is  "clone-app"
+          
+        notify "Cloning the #{@getData().name} repository as Koding App..."
+            
+        model.cloneAsApp =>
+          notify "#{@getData().name} successfully cloned."
+          
+      else if e.target.className is "clone"
+      
+        notify "Cloning the #{@getData().name} repository..."
+              
+        model.clone =>
+          notify "#{@getData().name} successfully cloned."
+  */
 
-  RepoView.prototype.click = function(e) {
-    var model;
-    model = new Repo(this.getData());
-    if (e.target.className === "clone-app") {
-      new KDNotificationView({
-        title: "Cloning the " + (this.getData().name) + " repository as Koding App..."
-      });
-      return model.cloneAsApp();
-    } else if (e.target.className === "clone") {
-      new KDNotificationView({
-        title: "Cloning the " + (this.getData().name) + " repository..."
-      });
-      return model.clone();
-    }
-  };
 
   return RepoView;
 
-})(KDListItemView);
+})(JView);
 
 GitHub.Views.ReposView = (function(_super) {
 
@@ -177,32 +241,63 @@ GitHub.Views.ReposView = (function(_super) {
     return ReposView.__super__.constructor.apply(this, arguments);
   }
 
+  ReposView.prototype.repos = [];
+
+  ReposView.prototype.resetRepos = function(repos, data) {
+    var _this = this;
+    $.each(repos, function(repo) {
+      return _this.addRepo(repo);
+    });
+    return this.emit("ResetRepos", this.repos, data);
+  };
+
+  ReposView.prototype.addRepo = function(repo, data) {
+    var _repo;
+    _repo = new Repo(repo);
+    this.repos.push(_repo);
+    return this.emit("AddRepo", _repo, repo, data);
+  };
+
+  ReposView.prototype.viewAppended = function() {};
+
   return ReposView;
 
-})(KDListView);
+})(JView);
 
 GitHub.Views.MainView = (function(_super) {
-  var RepoView, ReposView, _ref;
+  var RepoView, ReposView, _ref1;
 
   __extends(MainView, _super);
 
-  _ref = GitHub.Views, RepoView = _ref.RepoView, ReposView = _ref.ReposView;
+  _ref1 = GitHub.Views, RepoView = _ref1.RepoView, ReposView = _ref1.ReposView;
 
   function MainView() {
     MainView.__super__.constructor.apply(this, arguments);
     this.github = new Connector;
-    this.repoListView = new ReposView;
+    this.storage = Storage.getSingleton();
   }
 
-  MainView.prototype.viewAppended = function() {
-    var header, usernameButton, usernameField,
-      _this = this;
-    header = new KDHeaderView({
+  MainView.prototype.delegateElements = function() {
+    var _this = this;
+    this.header = new KDHeaderView({
       type: "big",
       title: "Koding GitHub Dashboard"
     });
-    usernameField = new KDInputView({
+    this.repoList = new ReposView;
+    this.repoList.on("AddRepo", function(repo) {
+      var repoView;
+      return repoView = new RepoView(repo);
+    });
+    this.repoList.on("ResetRepos", function(repos, _arg) {
+      var username;
+      username = _arg.username;
+      if (!repos.length) {
+        return notify("User " + username + " has no repository. :(");
+      }
+    });
+    this.usernameField = new KDInputView({
       placeholder: "Write a GitHub username.",
+      defaultValue: nickname,
       validate: {
         event: "keyup",
         rules: {
@@ -210,54 +305,43 @@ GitHub.Views.MainView = (function(_super) {
         }
       }
     });
-    usernameField.on("ValidationError", function() {
-      return usernameButton.disable();
+    this.usernameField.on("ValidationError", function() {
+      return _this.usernameButton.disable();
     });
-    usernameField.on("ValidationPassed", function() {
-      return usernameButton.enable();
+    this.usernameField.on("ValidationPassed", function() {
+      return _this.usernameButton.enable();
     });
-    usernameButton = new KDButtonView({
+    return this.usernameButton = new KDButtonView({
       title: "Get User Repositories",
       loader: {
         color: "#000",
         diameter: 16
       },
       callback: function() {
-        _this.github.getRepos(usernameField.getValue(), function(repos) {
-          var repo;
-          _this.classListController = new KDListViewController({
-            viewOptions: {
-              itemClass: RepoView
-            }
-          }, {
-            items: (function() {
-              var _i, _len, _results;
-              _results = [];
-              for (_i = 0, _len = repos.length; _i < _len; _i++) {
-                repo = repos[_i];
-                if (typeof repo === "object") {
-                  _results.push(repo);
-                }
-              }
-              return _results;
-            })()
+        var username;
+        username = _this.usernameField.getValue();
+        _this.github.getRepos(username, function(repos) {
+          _this.repoList.resetRepos(repos, {
+            username: username
           });
-          _this.addSubView(_this.classListController.getView());
-          usernameButton.hideLoader();
+          _this.usernameButton.hideLoader();
           return clearTimeout(_this.timeoutListener);
         });
-        return _this.timeoutListener = setTimeout((function() {
-          new KDNotificationView({
-            title: "Something wrong..."
-          });
-          return usernameButton.hideLoader();
-        }), GITHUB_TIMEOUT);
+        return _this.timeoutListener = setTimeout(function() {
+          notify("Something wrong...");
+          return _this.usernameButton.hideLoader();
+        }, Settings.requestTimeout);
       }
     });
-    usernameButton.disable();
-    this.addSubView(header);
-    this.addSubView(usernameField);
-    return this.addSubView(usernameButton);
+  };
+
+  MainView.prototype.pistachio = function() {
+    return "{{> this.header}}\n{{> this.usernameField}}{{> this.usernameButton}}\n<hr>\n{{> this.repoList}}";
+  };
+
+  MainView.prototype.viewAppended = function() {
+    this.delegateElements();
+    return this.setTemplate(this.pistachio());
   };
 
   return MainView;
@@ -271,9 +355,20 @@ GitHub.Views.MainView = (function(_super) {
 
 /* BLOCK STARTS /Source: /Users/fkadev/Applications/GitHubDashboard.kdapp/index.coffee */
 
+var MainView, Settings;
+
+Settings = GitHub.Settings;
+
+MainView = GitHub.Views.MainView;
 
 (function() {
-  return appView.addSubView(new GitHub.Views.MainView);
+  try {
+    return appView.addSubView(new MainView({
+      cssClass: Settings.baseViewClass
+    }));
+  } catch (error) {
+    return notify(error);
+  }
 })();
 
 
