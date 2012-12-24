@@ -4,44 +4,53 @@
 
 {notify}              = GitHub.Core.Utils
 
-class GitHub.Views.RepoView extends JView
+class GitHub.Views.RepoView extends KDListItemView
 
-  setModel: (@model)->
-    alert model.data.name
-  ###
+  constructor: (options, @data)->
+    options.cssClass = "repo-item"
+    @model = new Repo @data
+    
+    super
+    
+  partial: ()->
+    """
+    #{@data.name} - <span>#{@data.clone_url}</span>
+    <a href="#" class="clone-app">Clone as Koding App</a>
+    <a href="#" class="clone">Clone</a>
+    """
+
+  # Should be more elegant.
   click: (e)->
-    alert 1
-    no
-    model = new Repo @getData()
-
-    if e.target.className is  "clone-app"
+    
+    if e.target.className is "clone-app"
         
-      notify "Cloning the #{@getData().name} repository as Koding App..."
+      notify "Cloning the #{@data.name} repository as Koding App..."
           
-      model.cloneAsApp =>
-        notify "#{@getData().name} successfully cloned."
+      @model.cloneAsApp =>
+        notify "#{@data.name} successfully cloned."
         
     else if e.target.className is "clone"
     
-      notify "Cloning the #{@getData().name} repository..."
+      notify "Cloning the #{@data.name} repository..."
             
-      model.clone =>
-        notify "#{@getData().name} successfully cloned."
-  ###
+      @model.clone =>
+        notify "#{@data.name} successfully cloned."
 
-class GitHub.Views.ReposView extends JView
+class GitHub.Views.ReposView extends KDListViewController
 
   # Empty repos
   repos: [],
 
   resetRepos: (repos, data = {})->
+    @repos = []
+    @replaceAllItems []
     $.each repos, (i, repo)=>
       @addRepo repo, data
     @emit "ResetRepos", @repos, data
   
   addRepo: (repo, data = {})->
-    _repo = new Repo repo
-    @emit "AddRepo", _repo, data # model, JSON
+    @repos.push repo
+    @emit "AddRepo", repo, data # model, JSON
 
 # Main View
 class GitHub.Views.MainView extends JView
@@ -62,13 +71,18 @@ class GitHub.Views.MainView extends JView
       title   : "Koding GitHub Dashboard"
     
     @repoList = new ReposView
-    @repoList.on "AddRepo", (repoModel, repo)=>
-      console.log repoModel
-      #repoView = new RepoView
-      #repoView.setModel repo
-    
-    @repoList.on "ResetRepos", (repos, {username})->
-      unless repos.length then notify "User #{username} has no repository. :("
+      viewOptions:
+        itemClass: RepoView
+    , items: []
+        
+    @repoList.on "AddRepo", (repo)=>
+      @repoList.addItem repo
+
+    @repoList.on "ResetRepos", (repos, {username})=>
+      unless repos.length 
+        notify "User #{username} has no repository. :("
+        
+    @repoListView = @repoList.getView()
     
     # Field View
     @usernameField = new KDInputView
@@ -92,7 +106,13 @@ class GitHub.Views.MainView extends JView
         
         username = @usernameField.getValue()
         
-        @github.getRepos username, (repos)=>
+        @github.getRepos username, (error, repos)=>
+          
+          if error
+            @usernameButton.hideLoader()
+            clearTimeout @timeoutListener
+            return notify error
+        
           @repoList.resetRepos repos, {username}
           @usernameButton.hideLoader()
           clearTimeout @timeoutListener
@@ -107,10 +127,11 @@ class GitHub.Views.MainView extends JView
     {{> @header}}
     {{> @usernameField}}{{> @usernameButton}}
     <hr>
-    {{> @repoList}}
+    {{> @repoListView}}
     """
   
   viewAppended: ->
     @delegateElements()
     @setTemplate do @pistachio
+    @template.update()
         

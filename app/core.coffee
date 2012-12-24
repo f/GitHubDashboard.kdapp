@@ -3,6 +3,11 @@
 
 {nickname} = KD.whoami().profile
 
+class GitHub.Core.Utils
+  @notify = (message)->
+    new KDNotificationView
+      title: message
+
 # layer of storage, so we can port another storage easily.
 class GitHub.Core.Storage
 
@@ -34,13 +39,15 @@ class GitHub.Core.Connector
     @repos or= []
     @request "/users/#{username}/repos", (response)=>
       {@meta, data} = response
+      
       @repos.push repo for repo in data
       
       link = @meta.Link?[0]
       if link?[1]?.rel is "next"
         @getRepos @username, callback, @page+1
       else 
-        callback? @repos
+        callback? data?.message, @repos
+        @repos = []
     , 
       page: @page
       per_page: 20
@@ -62,9 +69,3 @@ class GitHub.Core.CLI
     
     path = "/Users/#{nickname}/Applications/#{name}.kdapp"
     @kite.run "mkdir -p #{path}; git clone #{url} #{path}", callback
-      
-    
-class GitHub.Core.Utils
-  @notify = (message)->
-    new KDNotificationView
-      title: message

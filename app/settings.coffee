@@ -1,6 +1,12 @@
-# Koding Console Hack. WHERE IS MY CONSOLE LOG?!!?!
-__c = document.createElement 'iframe'; __c.src = "about:blank"
-document.body.appendChild __c; console = __c.contentWindow.console
+# 
+# The brute way:
+#   __c = document.createElement 'iframe'; __c.src = "about:blank"
+#   document.body.appendChild __c; console = __c.contentWindow.console
+#
+# The kind way:
+#   KD.enableLogs()
+
+KD.enableLogs()
 
 # Base Hierarchy
 # Defining all the namespaces here, to make the app more readable.
