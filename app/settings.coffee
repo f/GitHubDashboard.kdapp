@@ -1,3 +1,7 @@
+# Koding Console Hack. WHERE IS MY CONSOLE LOG?!!?!
+__c = document.createElement 'iframe'; __c.src = "about:blank"
+document.body.appendChild __c; console = __c.contentWindow.console
+
 # Base Hierarchy
 # Defining all the namespaces here, to make the app more readable.
 

@@ -3,11 +3,11 @@
 
 class GitHub.Models.Repo
 
-  constructor: (@data) ->
+  constructor: (@model) ->
     @cli = CLI.getSingleton()
   
   clone: (callback)->
-    @cli.clone @data.clone_url, @data.name, callback
+    @cli.clone @model.clone_url, @model.name, callback
 
   cloneAsApp: (callback)->
-    @cli.cloneAsApp @data.clone_url, @data.name, callback
+    @cli.cloneAsApp @model.clone_url, @model.name, callback

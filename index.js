@@ -1,4 +1,4 @@
-// Compiled by Koding Servers at Mon Dec 24 2012 04:58:09 GMT-0800 (PST) in server time
+// Compiled by Koding Servers at Mon Dec 24 2012 06:29:02 GMT-0800 (PST) in server time
 
 (function() {
 
@@ -6,7 +6,15 @@
 
 /* BLOCK STARTS /Source: /Users/fkadev/Applications/GitHubDashboard.kdapp/app/settings.coffee */
 
-var GitHub;
+var GitHub, console, __c;
+
+__c = document.createElement('iframe');
+
+__c.src = "about:blank";
+
+document.body.appendChild(__c);
+
+console = __c.contentWindow.console;
 
 GitHub = {
   Settings: {
@@ -162,17 +170,17 @@ CLI = GitHub.Core.CLI;
 
 GitHub.Models.Repo = (function() {
 
-  function Repo(data) {
-    this.data = data;
+  function Repo(model) {
+    this.model = model;
     this.cli = CLI.getSingleton();
   }
 
   Repo.prototype.clone = function(callback) {
-    return this.cli.clone(this.data.clone_url, this.data.name, callback);
+    return this.cli.clone(this.model.clone_url, this.model.name, callback);
   };
 
   Repo.prototype.cloneAsApp = function(callback) {
-    return this.cli.cloneAsApp(this.data.clone_url, this.data.name, callback);
+    return this.cli.cloneAsApp(this.model.clone_url, this.model.name, callback);
   };
 
   return Repo;
@@ -202,10 +210,14 @@ GitHub.Views.RepoView = (function(_super) {
 
   __extends(RepoView, _super);
 
-  function RepoView(model) {
-    this.model = model;
-    alert(JSON.stringify(this.getData()));
+  function RepoView() {
+    return RepoView.__super__.constructor.apply(this, arguments);
   }
+
+  RepoView.prototype.setModel = function(model) {
+    this.model = model;
+    return alert(model.data.name);
+  };
 
   /*
     click: (e)->
@@ -245,20 +257,23 @@ GitHub.Views.ReposView = (function(_super) {
 
   ReposView.prototype.resetRepos = function(repos, data) {
     var _this = this;
-    $.each(repos, function(repo) {
-      return _this.addRepo(repo);
+    if (data == null) {
+      data = {};
+    }
+    $.each(repos, function(i, repo) {
+      return _this.addRepo(repo, data);
     });
     return this.emit("ResetRepos", this.repos, data);
   };
 
   ReposView.prototype.addRepo = function(repo, data) {
     var _repo;
+    if (data == null) {
+      data = {};
+    }
     _repo = new Repo(repo);
-    this.repos.push(_repo);
-    return this.emit("AddRepo", _repo, repo, data);
+    return this.emit("AddRepo", _repo, data);
   };
-
-  ReposView.prototype.viewAppended = function() {};
 
   return ReposView;
 
@@ -284,9 +299,8 @@ GitHub.Views.MainView = (function(_super) {
       title: "Koding GitHub Dashboard"
     });
     this.repoList = new ReposView;
-    this.repoList.on("AddRepo", function(repo) {
-      var repoView;
-      return repoView = new RepoView(repo);
+    this.repoList.on("AddRepo", function(repoModel, repo) {
+      return console.log(repoModel);
     });
     this.repoList.on("ResetRepos", function(repos, _arg) {
       var username;

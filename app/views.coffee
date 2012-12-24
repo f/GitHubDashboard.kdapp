@@ -6,8 +6,8 @@
 
 class GitHub.Views.RepoView extends JView
 
-  constructor: (@model)->
-    alert JSON.stringify @getData()
+  setModel: (@model)->
+    alert model.data.name
   ###
   click: (e)->
     alert 1
@@ -32,19 +32,16 @@ class GitHub.Views.RepoView extends JView
 class GitHub.Views.ReposView extends JView
 
   # Empty repos
-  repos: []
+  repos: [],
 
-  resetRepos: (repos, data)->
-    $.each repos, (repo)=>
-      @addRepo repo
+  resetRepos: (repos, data = {})->
+    $.each repos, (i, repo)=>
+      @addRepo repo, data
     @emit "ResetRepos", @repos, data
   
-  addRepo: (repo, data)->
+  addRepo: (repo, data = {})->
     _repo = new Repo repo
-    @repos.push _repo
-    @emit "AddRepo", _repo, repo, data # model, JSON
-    
-  viewAppended:->
+    @emit "AddRepo", _repo, data # model, JSON
 
 # Main View
 class GitHub.Views.MainView extends JView
@@ -65,8 +62,10 @@ class GitHub.Views.MainView extends JView
       title   : "Koding GitHub Dashboard"
     
     @repoList = new ReposView
-    @repoList.on "AddRepo", (repo)=>
-      repoView = new RepoView repo
+    @repoList.on "AddRepo", (repoModel, repo)=>
+      console.log repoModel
+      #repoView = new RepoView
+      #repoView.setModel repo
     
     @repoList.on "ResetRepos", (repos, {username})->
       unless repos.length then notify "User #{username} has no repository. :("
