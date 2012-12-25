@@ -26,13 +26,24 @@ class GitHub.Core.Storage
 class GitHub.Core.Connector
     
   API_ROOT    : "https://api.github.com"
+  
+  constructor:->
+    @kite   = KD.getSingleton "kiteController"
 
-  request:(url, callback, data)->
-    $.ajax 
-      url         : "#{@API_ROOT}#{url}"
-      data        : data
-      dataType    : "jsonp"
-      success     : callback
+  request:(url, callback, params)->
+    @kite.run "curl -kL #{@API_ROOT}#{url}", (error, data)->
+      
+      # if any error exists or data is empty, try JSONP
+      if error or not data
+        return $.ajax 
+          url         : "#{@API_ROOT}#{url}"
+          data        : params
+          dataType    : "jsonp"
+          success     : callback
+      
+      # parse the curl result.
+      try data = JSON.parse data
+      callback {data}
 
   # That method should be more generic.
   getRepos:(@username, callback, @page = 1)->
@@ -42,7 +53,7 @@ class GitHub.Core.Connector
       
       @repos.push repo for repo in data
       
-      link = @meta.Link?[0]
+      link = @meta?.Link?[0]
       if link?[1]?.rel is "next"
         @getRepos @username, callback, @page+1
       else 
@@ -51,7 +62,13 @@ class GitHub.Core.Connector
     , 
       page: @page
       per_page: 20
-            
+      
+  readRepoManifest: (appRepoName, callback)->
+    manifestFile: "https://raw.github.com/#{@username}/#{appRepoName}/master/.manifest"
+    @kite.run "curl -kL #{manifestFile}", (error, data)->
+      try data = JSON.parse data
+      callback error, data
+      
 class GitHub.Core.CLI
 
   @getSingleton: => @instance ?= new @

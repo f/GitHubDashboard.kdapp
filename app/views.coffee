@@ -157,5 +157,4 @@ class GitHub.Views.MainView extends JView
   viewAppended: ->
     @delegateElements()
     @setTemplate do @pistachio
-    @template.update()
         
