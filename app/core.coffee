@@ -8,6 +8,9 @@ class GitHub.Core.Utils
     new KDNotificationView
       title: message
 
+
+
+
 # layer of storage, so we can port another storage easily.
 class GitHub.Core.Storage
 
@@ -21,6 +24,10 @@ class GitHub.Core.Storage
   
   get: (key, callback) ->
     @store.getValue key, callback
+
+
+
+
 
 # GitHub Connector to connect and get data from GitHub API.
 class GitHub.Core.Connector
@@ -63,12 +70,26 @@ class GitHub.Core.Connector
       page: @page
       per_page: 20
       
-  readRepoManifest: (appRepoName, callback)->
+  readAppRepoManifest: (appRepoName, callback)->
     manifestFile: "https://raw.github.com/#{@username}/#{appRepoName}/master/.manifest"
     @kite.run "curl -kL #{manifestFile}", (error, data)->
       try data = JSON.parse data
       callback error, data
       
+  getAppRepoIcon: (appRepoName)->
+    appBase: "https://raw.github.com/#{@username}/#{appRepoName}/master/"
+    @readAppRepoManifest appRepoName, (error, data)->
+      
+      if error or not data
+        return false
+      
+      iconPath = data.icns["128"]
+      console.log "#{appBase}#{iconPath}"
+
+
+
+
+
 class GitHub.Core.CLI
 
   @getSingleton: => @instance ?= new @
