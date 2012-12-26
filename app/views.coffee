@@ -14,15 +14,40 @@ class GitHub.Views.RepoView extends KDListItemView
     
   partial: ()->
     """
-    #{@data.name} - <span>#{@data.clone_url}</span>
-    <a href="#" class="clone-app">Clone as Koding App</a>
+    #{@data.name} - 
     <a href="#" class="clone">Clone</a>
     """
 
   # Should be more elegant.
   click: (e)->
     
-    if e.target.className is "clone-app"
+    if e.target.className is "clone"
+    
+      notify "Cloning the #{@data.name} repository..."
+            
+      @model.clone =>
+        notify "#{@data.name} successfully cloned."
+
+
+class GitHub.Views.AppRepoView extends KDListItemView
+
+  constructor: (options, @data)->
+    options.cssClass = "app-repo-item"
+    @model = new Repo @data
+    
+    super
+    
+  partial: ()->
+    """
+    #{@data.name} - 
+    <a href="#" class="install">Install</a>
+    <a href="#" class="clone">Clone</a>
+    """
+
+  # Should be more elegant.
+  click: (e)->
+    
+    if e.target.className is "install"
         
       notify "Cloning the #{@data.name} repository as Koding App..."
           
@@ -35,6 +60,9 @@ class GitHub.Views.RepoView extends KDListItemView
             
       @model.clone =>
         notify "#{@data.name} successfully cloned."
+
+
+
 
 class GitHub.Views.ReposView extends KDListViewController
 
@@ -55,7 +83,7 @@ class GitHub.Views.ReposView extends KDListViewController
 # Main View
 class GitHub.Views.MainView extends JView
 
-  {RepoView, ReposView} = GitHub.Views
+  {RepoView, AppRepoView, ReposView} = GitHub.Views
   
   constructor: ->
     super
@@ -64,12 +92,12 @@ class GitHub.Views.MainView extends JView
   
   # Element delegation
   delegateElements:->
-    
     # Header View
     @header = new KDHeaderView
       type    : "big"
       title   : "Koding GitHub Dashboard"
     
+    # Repo List
     @repoList = new ReposView
       viewOptions:
         itemClass: RepoView
@@ -77,12 +105,22 @@ class GitHub.Views.MainView extends JView
         
     @repoList.on "AddRepo", (repo)=>
       @repoList.addItem repo
-
+      
     @repoList.on "ResetRepos", (repos, {username})=>
       unless repos.length 
         notify "User #{username} has no repository. :("
+      
+    # Application Repo List
+    @appRepoList = new ReposView
+      viewOptions:
+        itemClass: AppRepoView
+    , items: []
+    
+    @appRepoList.on "AddRepo", (repo)=>
+      @appRepoList.addItem repo
         
     @repoListView = @repoList.getView()
+    @appRepoListView = @appRepoList.getView()
     
     # Username View
     @usernameField = new KDInputView
@@ -124,12 +162,23 @@ class GitHub.Views.MainView extends JView
         
         @github.getRepos username, (error, repos)=>
           
+          _repos = []
+          _appRepos = []
+          
           if error
             @usernameButton.hideLoader()
             clearTimeout @timeoutListener
             return notify error
+            
+          $.each repos, (i, repo)=>
+            if repo.name.match /.kdapp$/
+              _appRepos.push repo
+            else
+              _repos.push repo
         
-          @repoList.resetRepos repos, {username}
+          @repoList.resetRepos _repos, {username}
+          @appRepoList.resetRepos _appRepos, {username}
+          
           @usernameButton.hideLoader()
           clearTimeout @timeoutListener
           
@@ -151,10 +200,12 @@ class GitHub.Views.MainView extends JView
     {{> @header}}
     {{> @usernameField}}{{> @usernameButton}}
     <hr>
+    {{> @appRepoListView}}
     {{> @repoListView}}
     """
   
   viewAppended: ->
     @delegateElements()
     @setTemplate do @pistachio
+    @template.update()
         

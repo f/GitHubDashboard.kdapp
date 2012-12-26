@@ -71,13 +71,13 @@ class GitHub.Core.Connector
       per_page: 20
       
   readAppRepoManifest: (appRepoName, callback)->
-    manifestFile: "https://raw.github.com/#{@username}/#{appRepoName}/master/.manifest"
+    manifestFile = "https://raw.github.com/#{@username}/#{appRepoName}/master/.manifest"
     @kite.run "curl -kL #{manifestFile}", (error, data)->
       try data = JSON.parse data
       callback error, data
       
-  getAppRepoIcon: (appRepoName)->
-    appBase: "https://raw.github.com/#{@username}/#{appRepoName}/master/"
+  getAppRepoIconFullURL: (appRepoName)->
+    appBase = "https://raw.github.com/#{@username}/#{appRepoName}/master/"
     @readAppRepoManifest appRepoName, (error, data)->
       
       if error or not data
@@ -85,7 +85,6 @@ class GitHub.Core.Connector
       
       iconPath = data.icns["128"]
       console.log "#{appBase}#{iconPath}"
-
 
 
 
