@@ -4,6 +4,8 @@
 
 {notify}                    = GitHub.Core.Utils
 
+{wait, killWait}            = KD.utils
+
 class GitHub.Views.RepoView extends KDListItemView
 
   constructor: (options, @data)->
@@ -14,7 +16,7 @@ class GitHub.Views.RepoView extends KDListItemView
     
   partial: ()->
     """
-    #{@data.name} - 
+    <span class="name">#{@data.name}</span>
     <a href="#" class="clone">Clone</a>
     """
 
@@ -39,7 +41,8 @@ class GitHub.Views.AppRepoView extends KDListItemView
     
   partial: ()->
     """
-    #{@data.name} - 
+    <img src="#{@data.__koding_icon}" width="128" height="128">
+    <span class="name">#{@data.name}</span> 
     <a href="#" class="install">Install</a>
     <a href="#" class="clone">Clone</a>
     """
@@ -68,6 +71,9 @@ class GitHub.Views.ReposView extends KDListViewController
 
   # Empty repos
   repos: []
+  
+  constructor:->
+    super
 
   resetRepos: (repos, data = {})->
     @repos = []
@@ -79,6 +85,7 @@ class GitHub.Views.ReposView extends KDListViewController
   addRepo: (repo, data = {})->
     @repos.push repo
     @emit "AddRepo", repo, data # model, JSON
+
 
 # Main View
 class GitHub.Views.MainView extends JView
@@ -101,7 +108,6 @@ class GitHub.Views.MainView extends JView
     @repoList = new ReposView
       viewOptions:
         itemClass: RepoView
-    , items: []
         
     @repoList.on "AddRepo", (repo)=>
       @repoList.addItem repo
@@ -114,13 +120,9 @@ class GitHub.Views.MainView extends JView
     @appRepoList = new ReposView
       viewOptions:
         itemClass: AppRepoView
-    , items: []
     
     @appRepoList.on "AddRepo", (repo)=>
       @appRepoList.addItem repo
-        
-    @repoListView = @repoList.getView()
-    @appRepoListView = @appRepoList.getView()
     
     # Username View
     @usernameField = new KDInputView
@@ -167,25 +169,26 @@ class GitHub.Views.MainView extends JView
           
           if error
             @usernameButton.hideLoader()
-            clearTimeout @timeoutListener
+            killWait @timeoutListener
             return notify error
             
           $.each repos, (i, repo)=>
             if repo.name.match /.kdapp$/
-              _appRepos.push repo
+              @github.getAppRepoIconFullURL repo.name, (icon)=>
+                repo.__koding_icon = icon
+                _appRepos.push repo
             else
               _repos.push repo
         
           @repoList.resetRepos _repos, {username}
           @appRepoList.resetRepos _appRepos, {username}
-          
+                   
           @usernameButton.hideLoader()
-          clearTimeout @timeoutListener
+          killWait @timeoutListener
           
-        @timeoutListener = setTimeout => 
+        @timeoutListener = wait Settings.requestTimeout, => 
           notify "Something wrong..."
           @usernameButton.hideLoader()
-        , Settings.requestTimeout
         
     # Button View
     @cloneUrlButton = new KDButtonView
@@ -195,17 +198,36 @@ class GitHub.Views.MainView extends JView
         diameter: 16
       callback    :=>
         
+    @appRepoListView = new KDView
+      cssClass: 'app-repo-list'
+    @appRepoListView.addSubView @appRepoList.getView()
+    
+    @repoListView = new KDView
+      cssClass: 'repo-list'
+    @repoListView.addSubView @repoList.getView()
+    
+    @containerView = new KDView
+      cssClass: 'repos'
+      
+    @containerView.addSubView new KDHeaderView
+      type: 'medium'
+      title: 'Koding Applications'
+    @containerView.addSubView @appRepoListView
+    
+    @containerView.addSubView new KDHeaderView
+      type: 'medium'
+      title: 'Repositories'
+    @containerView.addSubView @repoListView
+        
   pistachio: ->
     """
     {{> @header}}
     {{> @usernameField}}{{> @usernameButton}}
     <hr>
-    {{> @appRepoListView}}
-    {{> @repoListView}}
+    {{> @containerView}}
     """
   
   viewAppended: ->
     @delegateElements()
     @setTemplate do @pistachio
-    @template.update()
         

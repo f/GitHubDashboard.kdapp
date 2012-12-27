@@ -1,3 +1,18 @@
 .github-dashboard {
-  background: #e2e2e2 url(https://koding.com/images/finder-back.gif)
+  overflow: scroll;
+}
+
+.github-dashboard .repo-list,
+.github-dashboard .app-repo-list {
+  height: auto;
+}
+
+.github-dashboard .repo-item,
+.github-dashboard .app-repo-item {
+  border: 1px solid #ccc !important;
+  border-radius: 5px;
+  margin: 5px 0;
+  padding: 10px;
+  width: auto;
+  position: relative;
 }

@@ -76,15 +76,14 @@ class GitHub.Core.Connector
       try data = JSON.parse data
       callback error, data
       
-  getAppRepoIconFullURL: (appRepoName)->
+  getAppRepoIconFullURL: (appRepoName, callback)->
     appBase = "https://raw.github.com/#{@username}/#{appRepoName}/master/"
     @readAppRepoManifest appRepoName, (error, data)->
       
       if error or not data
         return false
       
-      iconPath = data.icns["128"]
-      console.log "#{appBase}#{iconPath}"
+      callback data.icns["128"]
 
 
 
