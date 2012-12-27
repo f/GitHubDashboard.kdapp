@@ -42,7 +42,8 @@ class GitHub.Views.AppRepoView extends KDListItemView
   partial: ()->
     """
     <img src="#{@data.__koding_icon}" width="128" height="128">
-    <span class="name">#{@data.name}</span> 
+    <span class="name">#{@data.__koding_manifest.name}</span>
+    <div class="description">#{@data.__koding_manifest.description}</div>
     <a href="#" class="install">Install</a>
     <a href="#" class="clone">Clone</a>
     """
@@ -174,14 +175,15 @@ class GitHub.Views.MainView extends JView
             
           $.each repos, (i, repo)=>
             if repo.name.match /.kdapp$/
-              @github.getAppRepoIconFullURL repo.name, (icon)=>
+              @github.getAppRepoIconFullURL repo.name, (icon, manifest)=>
                 repo.__koding_icon = icon
+                repo.__koding_manifest = manifest
                 _appRepos.push repo
+                @appRepoList.resetRepos _appRepos, {username}
             else
               _repos.push repo
         
           @repoList.resetRepos _repos, {username}
-          @appRepoList.resetRepos _appRepos, {username}
                    
           @usernameButton.hideLoader()
           killWait @timeoutListener

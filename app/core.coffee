@@ -78,12 +78,13 @@ class GitHub.Core.Connector
       
   getAppRepoIconFullURL: (appRepoName, callback)->
     appBase = "https://raw.github.com/#{@username}/#{appRepoName}/master/"
-    @readAppRepoManifest appRepoName, (error, data)->
+    @readAppRepoManifest appRepoName, (error, manifest)->
       
-      if error or not data
+      if error or not manifest
         return false
       
-      callback data.icns["128"]
+      iconPath = manifest.icns["128"]
+      callback "#{appBase}#{iconPath}", manifest
 
 
 
