@@ -1,5 +1,7 @@
 # GitHub Dashboard for Koding v0.2
 
+COOL INFO: THIS APPLICATION COMPLETELY DEVELOPED/DESIGNED/TESTED ON KODING. DAMN COOL!
+
 This is a simple GitHub Dashboard app for Koding users. Manages the applications and the repositories
 , clones into your `/Users/{yourusername}/GitHub/{repository}` and installs the applications served
 on GitHub.
