@@ -14,7 +14,7 @@ KD.enableLogs()
 GitHub =
     # Settings
     Settings:
-        baseViewClass: 'github-dahsboard'
+        baseViewClass: 'github-dashboard'
         appStorageName: 'github-dahsboard'
         # Timeout of request
         requestTimeout: 15000

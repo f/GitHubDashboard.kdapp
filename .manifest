@@ -22,7 +22,7 @@
       }
     },
     "stylesheets": [
-      "./resources/style.css"
+      "./resources/style.css?v2"
     ]
   },
   "options": {

@@ -10,62 +10,62 @@ class GitHub.Views.RepoView extends KDListItemView
 
   constructor: (options, @data)->
     options.cssClass = "repo-item"
+    super
     @model = new Repo @data
     
-    super
+    @cloneButton = new KDButtonView
+      cssClass   : "clean-gray clone"
+      title      : "Clone Repository"
+      callback   : =>
+        notify "Cloning the #{@data.name} repository..."
+            
+        @model.clone ->
+          notify "#{@data.name} successfully cloned."
     
-  partial: ()->
+  pistachio: ()->
     """
     <span class="name">#{@data.name}</span>
-    <a href="#" class="clone">Clone</a>
+    <span class="owner">Developed by <a href="http://github.com/#{@data.owner.login}" target="_blank">
+      #{@data.owner.login}</a></span>
+    <div class="description">#{@data.description}</div>
+    <code class="clone-url">$ git clone #{@data.clone_url}</code>
+    {{> @cloneButton}}
     """
-
-  # Should be more elegant.
-  click: (e)->
-    
-    if e.target.className is "clone"
-    
-      notify "Cloning the #{@data.name} repository..."
-            
-      @model.clone =>
-        notify "#{@data.name} successfully cloned."
+  
+  viewAppended: ()->
+    @setTemplate do @pistachio
 
 
-class GitHub.Views.AppRepoView extends KDListItemView
+class GitHub.Views.AppRepoView extends GitHub.Views.RepoView
 
   constructor: (options, @data)->
-    options.cssClass = "app-repo-item"
-    @model = new Repo @data
-    
     super
     
-  partial: ()->
+    @model = new Repo @data
+    
+    @installButton = new KDButtonView
+      cssClass   : "cupid-green install"
+      title      : "Install Application"
+      callback   : =>
+        notify "Cloning the #{@data.name} repository as Koding App..."
+          
+        @model.cloneAsApp ->
+          notify "#{@data.name} successfully cloned."
+    
+  pistachio: ()->
     """
     <img src="#{@data.__koding_icon}" width="128" height="128">
     <span class="name">#{@data.__koding_manifest.name}</span>
+    <span class="owner">Developed by <a href="http://github.com/#{@data.owner.login}" target="_blank">
+      #{@data.owner.login}</a></span>
     <div class="description">#{@data.__koding_manifest.description}</div>
-    <a href="#" class="install">Install</a>
-    <a href="#" class="clone">Clone</a>
+    
+    {{> @installButton}}
+    {{> @cloneButton}}
     """
-
-  # Should be more elegant.
-  click: (e)->
     
-    if e.target.className is "install"
-        
-      notify "Cloning the #{@data.name} repository as Koding App..."
-          
-      @model.cloneAsApp =>
-        notify "#{@data.name} successfully cloned."
-        
-    else if e.target.className is "clone"
-    
-      notify "Cloning the #{@data.name} repository..."
-            
-      @model.clone =>
-        notify "#{@data.name} successfully cloned."
-
-
+  viewAppended: ()->
+    @setTemplate do @pistachio
 
 
 class GitHub.Views.ReposView extends KDListViewController
@@ -100,10 +100,12 @@ class GitHub.Views.MainView extends JView
   
   # Element delegation
   delegateElements:->
-    # Header View
-    @header = new KDHeaderView
-      type    : "big"
-      title   : "Koding GitHub Dashboard"
+
+    @placeholderView = new KDView
+      cssClass: "placeholder"
+      partial : """
+                Hey! Just search for someone with GitHub username!
+                """
     
     # Repo List
     @repoList = new ReposView
@@ -125,43 +127,28 @@ class GitHub.Views.MainView extends JView
     @appRepoList.on "AddRepo", (repo)=>
       @appRepoList.addItem repo
     
-    # Username View
-    @usernameField = new KDInputView
-      placeholder     : "Write a GitHub username."
-      defaultValue    : nickname
+    # The Generic Input View
+    @theField = new KDInputView
+      cssClass        : "username text"
+      placeholder     : "Write a GitHub username or a repository URL to get started."
       validate        :
         event         : "keyup"
         rules         :
           required    : yes
     
-    @usernameField.on "ValidationError",  => do @usernameButton.disable
-    @usernameField.on "ValidationPassed", => do @usernameButton.enable
-    
-    # Clone URL View
-    @cloneUrlField = new KDInputView
-      placeholder     : "clone url."
-      validate        :
-        event         : "keyup"
-        rules         :
-          required    : yes
-    
-    @cloneUrlField.on "ValidationError",  => 
-      do @cloneUrlButton.disable
-      do @cloneUrlAppButton.disable
-      
-    @cloneUrlField.on "ValidationPassed", => 
-      do @cloneUrlButton.enable
-      do @cloneUrlAppButton.enable
+    @theField.on "ValidationError",  => do @usernameButton.disable
+    @theField.on "ValidationPassed", => do @usernameButton.enable
     
     # Button View
     @usernameButton = new KDButtonView
+      cssClass    : "clean-gray username-button"
       title       : "Get User Repositories"
       loader      :
         color   : "#000"
         diameter: 16
       callback    :=>
         
-        username = @usernameField.getValue()
+        username = @theField.getValue()
         
         @github.getRepos username, (error, repos)=>
           
@@ -185,20 +172,26 @@ class GitHub.Views.MainView extends JView
         
           @repoList.resetRepos _repos, {username}
                    
-          @usernameButton.hideLoader()
+          wait 1200, => 
+            @usernameButton.hideLoader()
+            @placeholderView.hide()
+            @containerView.show()
+            
           killWait @timeoutListener
           
         @timeoutListener = wait Settings.requestTimeout, => 
           notify "Something wrong..."
           @usernameButton.hideLoader()
         
-    # Button View
+        
     @cloneUrlButton = new KDButtonView
-      title       : "Clone URL"
-      loader      :
-        color   : "#000"
-        diameter: 16
-      callback    :=>
+      cssClass    : "clean-gray cloneurl-button"
+      title       : "Clone Repository URL"
+      callback    : =>
+        notify "Coming Soon!"
+    
+    do @cloneUrlButton.disable
+    do @usernameButton.disable
         
     @appRepoListView = new KDView
       cssClass: 'app-repo-list'
@@ -210,23 +203,23 @@ class GitHub.Views.MainView extends JView
     
     @containerView = new KDView
       cssClass: 'repos'
+    @containerView.hide()
       
-    @containerView.addSubView new KDHeaderView
-      type: 'medium'
-      title: 'Koding Applications'
     @containerView.addSubView @appRepoListView
-    
-    @containerView.addSubView new KDHeaderView
-      type: 'medium'
-      title: 'Repositories'
     @containerView.addSubView @repoListView
         
   pistachio: ->
     """
-    {{> @header}}
-    {{> @usernameField}}{{> @usernameButton}}
-    <hr>
-    {{> @containerView}}
+    <div class="main-view">
+      <header>
+        <figure></figure>
+        {{> @theField}}
+        {{> @usernameButton}}
+        {{> @cloneUrlButton}}
+      </header>
+      {{> @containerView}}
+      {{> @placeholderView}}
+    </div>
     """
   
   viewAppended: ->

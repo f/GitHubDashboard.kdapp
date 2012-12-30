@@ -103,7 +103,9 @@ class GitHub.Core.CLI
     path = "#{root}/#{name}"
     
     @kite.run "mkdir -p #{path}; git clone #{url} #{path}", =>
-      KD.utils.wait 200, => 
+      KD.utils.wait 1000, => 
+        @tree.refreshFolder @tree.nodes["/Users/#{nickname}/"]
+      KD.utils.wait 1500, => 
         @tree.refreshFolder @tree.nodes[root]
       do callback
 
@@ -114,6 +116,6 @@ class GitHub.Core.CLI
     path = "#{root}/#{name}.kdapp"
     
     @kite.run "mkdir -p #{path}; git clone #{url} #{path}", =>
-      KD.utils.wait 200, => 
+      KD.utils.wait 1000, => 
         @tree.refreshFolder @tree.nodes[root]
       do callback
