@@ -292,6 +292,7 @@ class GitHub.Views.MainView extends JView
         
   pistachio: ->
     """
+    <div class="scrollfade"></div>
     <div class="main-view">
       <header>
         <figure></figure>
