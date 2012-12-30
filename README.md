@@ -4,6 +4,21 @@ This is a simple GitHub Dashboard app for Koding users. Manages the applications
 , clones into your `/Users/{yourusername}/GitHub/{repository}` and installs the applications served
 on GitHub.
 
+## Install it into your Koding
+
+This application is not available on Koding App Store (yet). You can try it cloning it into your Applications
+directory.
+
+- Open your Terminal application.
+
+```bash
+cd Applications
+git clone https://github.com/fkadeveloper/GitHubDashboard.kdapp GitHubDashboard.kdapp
+```
+- Refresh Applications
+- Run "GitHub Dashboard".
+
+
 ## Screenshots
 
 ### Main Page
