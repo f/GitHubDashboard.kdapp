@@ -12,6 +12,7 @@ class GitHub.Views.RepoView extends KDListItemView
     options.cssClass = "repo-item"
     super
     @storage = Storage.getSingleton()
+    window.__ghstorage = @storage
     @model = new Repo @data
     @action = if @data.fork then "Forked" else "Developed"
     
@@ -22,7 +23,7 @@ class GitHub.Views.RepoView extends KDListItemView
         notify "Cloning the #{@data.name} repository..."
             
         @model.clone =>
-          notify "#{@data.name} successfully cloned."
+          wait 300, => notify "#{@data.name} successfully cloned."
           #do @pushClonedRepo
           
   partial: -> 
@@ -37,14 +38,16 @@ class GitHub.Views.RepoView extends KDListItemView
     """
     
   pushClonedRepo: ()->
-    @storage.get "GitHub.Repos.Cloned", (data)=>
+    @storage.get "GitHubReposCloned", (data)=>
+      data = [] unless data.push
       data.push @data
-      @storage.set "GitHub.Repos.Cloned", data
+      @storage.set "GitHubReposCloned", data
       
   pushClonedAppRepo: ()->
-    @storage.get "GitHub.AppRepos.Cloned", (data)=>
+    @storage.get "GitHubAppReposCloned", (data)=>
+      data = [] unless data.push
       data.push @data
-      @storage.set "GitHub.AppRepos.Cloned", data
+      @storage.set "GitHubAppReposCloned", data
   
   viewAppended: ()->
     @setTemplate do @pistachio
@@ -63,8 +66,8 @@ class GitHub.Views.AppRepoView extends GitHub.Views.RepoView
       callback   : =>
         notify "Cloning the #{@data.name} repository as Koding App..."
           
-        @model.cloneAsApp ->
-          notify "#{@data.name} successfully cloned."
+        @model.cloneAsApp =>
+          wait 300, => notify "#{@data.name} successfully cloned."
           #do @pushClonedAppRepo
     
   pistachio: ()->

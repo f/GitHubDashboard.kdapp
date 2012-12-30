@@ -15,7 +15,7 @@ GitHub =
     # Settings
     Settings:
         baseViewClass: 'github-dashboard'
-        appStorageName: 'github-dahsboard'
+        appStorageName: 'github-dashboard'
         # Timeout of request
         requestTimeout: 15000
         

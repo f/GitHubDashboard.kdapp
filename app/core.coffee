@@ -9,8 +9,6 @@ class GitHub.Core.Utils
       title: message
 
 
-
-
 # layer of storage, so we can port another storage easily.
 class GitHub.Core.Storage
 
@@ -24,7 +22,6 @@ class GitHub.Core.Storage
   
   get: (key, callback) ->
     @store.getValue key, callback
-
 
 
 # GitHub Connector to connect and get data from GitHub API.
@@ -83,8 +80,6 @@ class GitHub.Core.Connector
       
       iconPath = manifest.icns["128"]
       callback "#{appBase}#{iconPath}", manifest
-
-
 
 
 class GitHub.Core.CLI
