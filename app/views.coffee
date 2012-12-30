@@ -24,7 +24,7 @@ class GitHub.Views.RepoView extends KDListItemView
             
         @model.clone =>
           wait 300, => notify "#{@data.name} successfully cloned."
-          #do @pushClonedRepo
+          @pushClonedRepo @data
           
   partial: -> 
   pistachio: ()->
@@ -37,17 +37,17 @@ class GitHub.Views.RepoView extends KDListItemView
     {{> @cloneButton}}
     """
     
-  pushClonedRepo: ()->
-    @storage.get "GitHubReposCloned", (data)=>
-      data = [] unless data.push
-      data.push @data
-      @storage.set "GitHubReposCloned", data
+  pushClonedRepo: (repo)->
+    @storage.get "repos", (data)=>
+      data or= []
+      data.push repo
+      @storage.set "repos", data
       
-  pushClonedAppRepo: ()->
-    @storage.get "GitHubAppReposCloned", (data)=>
-      data = [] unless data.push
-      data.push @data
-      @storage.set "GitHubAppReposCloned", data
+  pushClonedAppRepo: (repo)->
+    @storage.get "appRepos", (data)=>
+      data or= []
+      data.push repo
+      @storage.set "appRepos", data
   
   viewAppended: ()->
     @setTemplate do @pistachio
@@ -68,7 +68,7 @@ class GitHub.Views.AppRepoView extends GitHub.Views.RepoView
           
         @model.cloneAsApp =>
           wait 300, => notify "#{@data.name} successfully cloned."
-          #do @pushClonedAppRepo
+          @pushClonedAppRepo @data
     
   pistachio: ()->
     """

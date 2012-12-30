@@ -21,7 +21,7 @@ class GitHub.Core.Storage
     @store.setValue key, value
   
   get: (key, callback) ->
-    @store.getValue key, callback
+    @store.fetchValue key, callback
 
 
 # GitHub Connector to connect and get data from GitHub API.
