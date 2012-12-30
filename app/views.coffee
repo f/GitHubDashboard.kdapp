@@ -154,8 +154,12 @@ class GitHub.Views.MainView extends JView
         rules         :
           required    : yes
     
-    @theField.on "ValidationError",  => do @usernameButton.disable
-    @theField.on "ValidationPassed", => do @usernameButton.enable
+    @theField.on "ValidationError",  => 
+      do @cloneUrlButton.disable
+      do @usernameButton.disable
+    @theField.on "ValidationPassed", => 
+      do @cloneUrlButton.enable
+      do @usernameButton.enable
     
     # Button View
     @usernameButton = new KDButtonView
@@ -166,7 +170,13 @@ class GitHub.Views.MainView extends JView
         diameter: 16
       callback    :=>
         
-        username = @theField.getValue()
+        [username, repoName] = @theField.getValue().split "/"
+        
+        @appRepoList.replaceAllItems []
+        @repoList.replaceAllItems []
+        @placeholderView.show()
+        
+        console.log @placeholderView
         
         @github.getRepos username, (error, repos)=>
           
@@ -179,6 +189,10 @@ class GitHub.Views.MainView extends JView
             return notify error
             
           $.each repos, (i, repo)=>
+            if repoName and repo.name isnt repoName
+              @appRepoList.resetRepos [], {username}
+              return
+            
             if repo.name.match /.kdapp$/
               @github.getAppRepoIconFullURL repo.name, (icon, manifest)=>
                 repo.__koding_icon = icon
@@ -203,10 +217,60 @@ class GitHub.Views.MainView extends JView
         
         
     @cloneUrlButton = new KDButtonView
-      cssClass    : "clean-gray cloneurl-button"
-      title       : "Clone Repository URL"
-      callback    : =>
-        notify "Coming Soon!"
+      cssClass          : "clean-gray cloneurl-button"
+      title             : "Clone Repository URL"
+      callback          : =>
+        
+        cli = CLI.getSingleton()
+        
+        repoPath = @theField.getValue()
+        repoUrl = repoPath.replace /(https?:\/\/)?github.com\/(.*)\/(.*)/, "$2/$3"
+        [repoUser, repoName] = repoUrl.split "/"
+        
+        unless repoUser and repoName
+          notify "This is not a clone URL, sorry. :("
+          return
+          
+        modal = new KDModalViewWithForms
+          title         : "Clone Repository URL"
+          content       : "<div class='modalformline'>Please write a name to clone the repository.</div>"
+          overlay       : yes
+          tabs          :
+            forms       :
+              form      :
+                fields  :
+                  "User":
+                    label    : "Repository"
+                    name     : "repoUrl"
+                    defaultValue: "https://github.com/#{repoUrl}"
+                    disabled : yes
+                  "Root":
+                    label    : "Clone Root"
+                    name     : "root"
+                    defaultValue: "/Users/#{nickname}/GitHub/"
+                    disabled : yes
+                    tooltip  : "asd"
+                  "Path":
+                    label    : "Clone Path"
+                    name     : "root"
+                    defaultValue: "#{repoName}"
+                    
+                buttons : 
+                  "Clone the Repository":
+                    loader   :
+                      color  : "#000"
+                      diameter: 16
+                    style    : "modal-clean-gray"
+                    callback : =>
+                      notify "Cloning #{repoName} repository."
+                      cloneUrl = "https://github.com/#{repoUrl}"
+                      clonePath = modal.modalTabs.forms.form.inputs.Path.getValue()
+                      
+                      cli.clone cloneUrl, clonePath, =>
+                        notify "Cloned #{repoName} repository successfully!"
+                        modal.modalTabs.forms.form.buttons["Clone the Repository"].hideLoader()
+                        modal.destroy()
+                
     
     do @cloneUrlButton.disable
     do @usernameButton.disable
