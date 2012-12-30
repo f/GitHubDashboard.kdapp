@@ -12,6 +12,7 @@ class GitHub.Views.RepoView extends KDListItemView
     options.cssClass = "repo-item"
     super
     @model = new Repo @data
+    @action = if @data.fork then "Forked" else "Developed"
     
     @cloneButton = new KDButtonView
       cssClass   : "clean-gray clone"
@@ -25,7 +26,7 @@ class GitHub.Views.RepoView extends KDListItemView
   pistachio: ()->
     """
     <span class="name">#{@data.name}</span>
-    <span class="owner">Developed by <a href="http://github.com/#{@data.owner.login}" target="_blank">
+    <span class="owner">#{@action} by <a href="http://github.com/#{@data.owner.login}" target="_blank">
       #{@data.owner.login}</a></span>
     <div class="description">#{@data.description}</div>
     <code class="clone-url">$ git clone #{@data.clone_url}</code>
@@ -56,7 +57,7 @@ class GitHub.Views.AppRepoView extends GitHub.Views.RepoView
     """
     <img src="#{@data.__koding_icon}" width="128" height="128">
     <span class="name">#{@data.__koding_manifest.name}</span>
-    <span class="owner">Developed by <a href="http://github.com/#{@data.owner.login}" target="_blank">
+    <span class="owner">#{@action} by <a href="http://github.com/#{@data.owner.login}" target="_blank">
       #{@data.owner.login}</a></span>
     <div class="description">#{@data.__koding_manifest.description}</div>
     
