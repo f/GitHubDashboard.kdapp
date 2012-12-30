@@ -29,7 +29,9 @@
     "type": "tab"
   },
   "icns": {
-    "128": "./resources/github.128.png"
+    "128": "./resources/github.128.png",
+    "256": "./resources/github.256.png",
+    "512": "./resources/github.512.png"
   },
   "screenshots": [
     "./resources/screenshots/github1.png",
