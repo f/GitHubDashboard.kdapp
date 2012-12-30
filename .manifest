@@ -30,5 +30,11 @@
   },
   "icns": {
     "128": "./resources/github.128.png"
-  }
+  },
+  "screenshots": [
+    "./resources/screenshots/github1.png",
+    "./resources/screenshots/github2.png",
+    "./resources/screenshots/github3.png",
+    "./resources/screenshots/github4.png"
+  ]
 }
