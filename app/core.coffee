@@ -27,8 +27,6 @@ class GitHub.Core.Storage
 
 
 
-
-
 # GitHub Connector to connect and get data from GitHub API.
 class GitHub.Core.Connector
     
@@ -104,10 +102,10 @@ class GitHub.Core.CLI
     
     @kite.run "mkdir -p #{path}; git clone #{url} #{path}", =>
       KD.utils.wait 1000, => 
-        @tree.refreshFolder @tree.nodes["/Users/#{nickname}/"]
+        @tree.refreshFolder @tree.nodes["/Users/#{nickname}"]
       KD.utils.wait 1500, => 
         @tree.refreshFolder @tree.nodes[root]
-      do callback
+      callback.apply @, arguments
 
   cloneAsApp: (url, name, callback)->
     # Clear the repo name.
@@ -118,4 +116,4 @@ class GitHub.Core.CLI
     @kite.run "mkdir -p #{path}; git clone #{url} #{path}", =>
       KD.utils.wait 1000, => 
         @tree.refreshFolder @tree.nodes[root]
-      do callback
+      callback.apply @, arguments
