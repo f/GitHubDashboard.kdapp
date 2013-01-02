@@ -1,6 +1,6 @@
 {
   "devMode": true,
-  "version": "0.2",
+  "version": "0.1",
   "name": "GitHub Dashboard",
   "identifier": "com.koding.apps.githubdashboard",
   "path": "~/Applications/GitHubDashboard.kdapp",

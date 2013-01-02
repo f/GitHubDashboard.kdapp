@@ -12,7 +12,7 @@ class GitHub.Views.RepoView extends KDListItemView
     options.cssClass = "repo-item"
     super
     @storage = Storage.getSingleton()
-    window.__ghstorage = @storage
+
     @model = new Repo @data
     @action = if @data.fork then "Forked" else "Developed"
     
@@ -64,11 +64,34 @@ class GitHub.Views.AppRepoView extends GitHub.Views.RepoView
       cssClass   : "cupid-green install"
       title      : "Install Application"
       callback   : =>
-        notify "Cloning the #{@data.name} repository as Koding App..."
-          
-        @model.cloneAsApp =>
-          wait 300, => notify "#{@data.name} successfully cloned."
-          @pushClonedAppRepo @data
+        warning = new KDModalView
+          title  : "Security Warning"
+          overlay: yes
+          content: """
+          <div class='modalformline'>
+          Installing apps from outside of Koding AppStore could be <strong>dangerous</strong>.
+          <br>
+          This app can reach (and modify) all of your files, settings and all other 
+          information you shared with Koding. If you don't know what you are doing, 
+          it's not <strong>recommended</strong> to install apps from outside of Koding AppStore.
+          <br>
+          Do you want to continue to install this app from #{@data.clone_url}?
+          </div>
+          """
+          buttons: 
+            "Yes, I know the risks":
+              loader   :
+                color  : "#000"
+                diameter: 16
+              style    : "modal-clean-gray"
+              callback : =>
+                          
+                notify "Installing #{@data.__koding_manifest.name}..."
+                  
+                @model.cloneAsApp =>
+                  wait 300, => notify "#{@data.__koding_manifest.name} successfully installed."
+                  warning.destroy()
+                  @pushClonedAppRepo @data
     
   pistachio: ()->
     """
@@ -83,6 +106,7 @@ class GitHub.Views.AppRepoView extends GitHub.Views.RepoView
     """
     
   viewAppended: ()->
+    @storage 
     @setTemplate do @pistachio
 
 
@@ -115,6 +139,21 @@ class GitHub.Views.MainView extends JView
     super
     @github       = new Connector
     @storage      = Storage.getSingleton()
+    
+  getExistingRepos: (callback)->
+    
+    @storage.get "appRepos", (storedAppRepos)=>
+      if storedAppRepos.length
+        @appRepoList.resetRepos storedAppRepos
+    
+      @storage.get "repos", (storedRepos)=>
+        if storedRepos.length
+          @repoList.resetRepos storedRepos
+        wait 1200, => 
+          @placeholderView.hide()
+          @containerView.show()
+          do callback if callback
+            
   
   # Element delegation
   delegateElements:->
@@ -134,8 +173,9 @@ class GitHub.Views.MainView extends JView
       @repoList.addItem repo
       
     @repoList.on "ResetRepos", (repos, {username})=>
-      unless repos.length 
-        notify "User #{username} has no repository. :("
+      if username
+        unless repos.length
+          notify "User #{username} has no repository. :("
       
     # Application Repo List
     @appRepoList = new ReposView
@@ -214,8 +254,19 @@ class GitHub.Views.MainView extends JView
         @timeoutListener = wait Settings.requestTimeout, => 
           notify "Something wrong..."
           @usernameButton.hideLoader()
-        
-        
+    
+    # @getExistingRepos()
+    
+    @dashboardButton = new KDButtonView
+      cssClass          : "clean-gray cloneurl-button"
+      title             : "Dashboard"
+      loader            :
+        color           : "#000"
+        diameter        : 16
+      callback          : => 
+        @getExistingRepos =>
+          @dashboardButton.hideLoader()
+    
     @cloneUrlButton = new KDButtonView
       cssClass          : "clean-gray cloneurl-button"
       title             : "Clone Repository URL"
@@ -308,4 +359,3 @@ class GitHub.Views.MainView extends JView
   viewAppended: ->
     @delegateElements()
     @setTemplate do @pistachio
-        
