@@ -10,4 +10,14 @@ class GitHub.Models.Repo
     @cli.clone @model.clone_url, @model.name, callback
 
   cloneAsApp: (callback)->
-    @cli.cloneAsApp @model.clone_url, @model.name, callback
+    console.log @model.__koding_manifest.path
+    if @model.__koding_manifest.path
+      match = @model.__koding_manifest.path.match /\/([^\/]*).kdapp\/?$/
+      if match
+        name = match[1]
+      else
+        name = @model.name
+    else
+      name = @model.name
+      
+    @cli.cloneAsApp @model.clone_url, name, callback

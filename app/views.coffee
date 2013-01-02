@@ -69,13 +69,15 @@ class GitHub.Views.AppRepoView extends GitHub.Views.RepoView
           overlay: yes
           content: """
           <div class='modalformline'>
-          Installing apps from outside of Koding AppStore could be <strong>dangerous</strong>.
-          <br>
-          This app can reach (and modify) all of your files, settings and all other 
-          information you shared with Koding. If you don't know what you are doing, 
-          it's not <strong>recommended</strong> to install apps from outside of Koding AppStore.
-          <br>
-          Do you want to continue to install this app from #{@data.clone_url}?
+            <p>
+              Installing apps from outside of Koding AppStore could be <strong>dangerous</strong>.
+              This app can reach (and modify) all of your files, settings and all other 
+              information you shared with Koding. If you don't know what you are doing, 
+              it's not <strong>recommended</strong> to install apps from outside of Koding AppStore.
+            </p>
+            <p>
+              Do you want to continue to install this app from #{@data.clone_url}?
+            </p>
           </div>
           """
           buttons: 

@@ -6,7 +6,7 @@
 # The kind way:
 #   KD.enableLogs()
 
-KD.enableLogs()
+# KD.enableLogs()
 
 # Base Hierarchy
 # Defining all the namespaces here, to make the app more readable.

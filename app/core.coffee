@@ -111,4 +111,5 @@ class GitHub.Core.CLI
     @kite.run "mkdir -p #{path}; git clone #{url} #{path}", =>
       KD.utils.wait 1000, => 
         @tree.refreshFolder @tree.nodes[root]
+        KD.getSingleton('kodingAppsController').refreshApps()
       callback.apply @, arguments
