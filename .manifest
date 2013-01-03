@@ -1,6 +1,6 @@
 {
   "version": "0.1.1",
-  "name": "GitHub Dashboard",
+  "name": "Dashboard for GitHub",
   "identifier": "com.koding.apps.githubdashboard",
   "path": "~/Applications/GitHubDashboard.kdapp",
   "homepage": "fkadev.koding.com/githubdashboard",
