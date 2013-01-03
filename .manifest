@@ -1,6 +1,5 @@
 {
-  "devMode": true,
-  "version": "0.1",
+  "version": "0.1.1",
   "name": "GitHub Dashboard",
   "identifier": "com.koding.apps.githubdashboard",
   "path": "~/Applications/GitHubDashboard.kdapp",
@@ -22,7 +21,7 @@
       }
     },
     "stylesheets": [
-      "./resources/style.css?v2"
+      "./resources/style.css"
     ]
   },
   "options": {
