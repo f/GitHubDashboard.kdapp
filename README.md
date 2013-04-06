@@ -15,7 +15,7 @@ directory.
 
 ```bash
 cd Applications
-git clone https://github.com/fkadeveloper/GitHubDashboard.kdapp GitHubDashboard.kdapp
+git clone https://github.com/f/GitHubDashboard.kdapp GitHubDashboard.kdapp
 ```
 - Refresh Applications
 - Run "GitHub Dashboard".
@@ -24,13 +24,13 @@ git clone https://github.com/fkadeveloper/GitHubDashboard.kdapp GitHubDashboard.
 ## Screenshots
 
 ### Main Page
-![](https://raw.github.com/fkadeveloper/GitHubDashboard.kdapp/master/resources/screenshots/github1.png)
+![](https://raw.github.com/f/GitHubDashboard.kdapp/master/resources/screenshots/github1.png)
 
 ### User Search
-![](https://raw.github.com/fkadeveloper/GitHubDashboard.kdapp/master/resources/screenshots/github2.png)
+![](https://raw.github.com/f/GitHubDashboard.kdapp/master/resources/screenshots/github2.png)
 
 ### User Repository Filter
-![](https://raw.github.com/fkadeveloper/GitHubDashboard.kdapp/master/resources/screenshots/github3.png)
+![](https://raw.github.com/f/GitHubDashboard.kdapp/master/resources/screenshots/github3.png)
 
 ### Cloning Custom GitHub Clone URL
-![](https://raw.github.com/fkadeveloper/GitHubDashboard.kdapp/master/resources/screenshots/github4.png)
+![](https://raw.github.com/f/GitHubDashboard.kdapp/master/resources/screenshots/github4.png)
