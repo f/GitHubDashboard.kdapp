@@ -33,7 +33,7 @@ class GitHub.Core.Connector
     @kite   = KD.getSingleton "kiteController"
 
   request:(url, callback, params)->
-    @kite.run "curl -kL #{@API_ROOT}#{url}", (error, data)->
+    @kite.run "curl -kLss #{@API_ROOT}#{url}", (error, data)->
       
       # if any error exists or data is empty, try JSONP
       if error or not data
@@ -66,8 +66,8 @@ class GitHub.Core.Connector
       per_page: 20
       
   readAppRepoManifest: (appRepoName, callback)->
-    manifestFile = "https://raw.github.com/#{@username}/#{appRepoName}/master/.manifest"
-    @kite.run "curl -kL #{manifestFile}", (error, data)->
+    manifestFile = "https://raw.github.com/#{@username}/#{appRepoName}/master/manifest.json"
+    @kite.run "curl -kLss #{manifestFile}", (error, data)->
       try data = JSON.parse data
       callback error, data
       
@@ -92,12 +92,12 @@ class GitHub.Core.CLI
     @tree   = @finder.treeController
 
   clone: (url, name, callback)->
-    root = "/Users/#{nickname}/GitHub"
+    root = "~/#{nickname}/GitHub"
     path = "#{root}/#{name}"
     
     @kite.run "mkdir -p #{path}; git clone #{url} #{path}", =>
       KD.utils.wait 1000, => 
-        @tree.refreshFolder @tree.nodes["/Users/#{nickname}"]
+        @tree.refreshFolder @tree.nodes["~/#{nickname}"]
       KD.utils.wait 1500, => 
         @tree.refreshFolder @tree.nodes[root]
       callback.apply @, arguments
@@ -105,7 +105,7 @@ class GitHub.Core.CLI
   cloneAsApp: (url, name, callback)->
     # Clear the repo name.
     name = name.replace(/.kdapp$/, '')
-    root = "/Users/#{nickname}/Applications"
+    root = "~/#{nickname}/Applications"
     path = "#{root}/#{name}.kdapp"
     
     @kite.run "mkdir -p #{path}; git clone #{url} #{path}", =>
