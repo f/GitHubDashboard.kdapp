@@ -1,0 +1,43 @@
+{
+  "devMode": true,
+  "version": "0.1.2",
+  "name": "Dashboard for GitHub",
+  "identifier": "com.koding.apps.githubdashboard",
+  "path": "~/Applications/GitHubDashboard.kdapp",
+  "homepage": "fkadev.koding.com/githubdashboard",
+  "author": "Fatih Kadir Akın",
+  "repository": "git://github.com/fkadeveloper/githubdashboard.kdapp.git",
+  "description": "GitHub Dashboard: a Koding application to manage GitHub repositories and installer for Koding Applications served on GitHub.",
+  "category": "web-app",
+  "source": {
+    "blocks": {
+      "app": {
+        "files": [
+          "./app/settings.coffee",
+          "./app/core.coffee",
+          "./app/models.coffee",
+          "./app/views.coffee",
+          "./index.coffee"
+        ]
+      }
+    },
+    "stylesheets": [
+      "./resources/style.css"
+    ]
+  },
+  "options": {
+    "type": "tab"
+  },
+  "icns": {
+    "128": "./resources/icon.128.png",
+    "160": "./resources/icon.160.png",
+    "256": "./resources/icon.256.png",
+    "512": "./resources/icon.512.png"
+  },
+  "screenshots": [
+    "./resources/screenshots/github1.png",
+    "./resources/screenshots/github2.png",
+    "./resources/screenshots/github3.png",
+    "./resources/screenshots/github4.png"
+  ]
+}
