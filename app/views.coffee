@@ -227,6 +227,7 @@ class GitHub.Views.MainView extends JView
         console.log @placeholderView
         
         @github.getRepos username, (error, repos)=>
+          
           _repos = []
           _appRepos = []
           

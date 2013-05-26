@@ -64,7 +64,13 @@ class GitHub.Core.Connector
     , 
       page: @page
       per_page: 20
-      
+
+  readAppRepoOldManifest: (appRepoName, callback)->
+    manifestFile = "https://raw.github.com/#{@username}/#{appRepoName}/master/.manifest"
+    @kite.run "curl -kLss #{manifestFile}", (error, data)->
+      try data = JSON.parse data
+      callback error, data
+
   readAppRepoManifest: (appRepoName, callback)->
     manifestFile = "https://raw.github.com/#{@username}/#{appRepoName}/master/manifest.json"
     @kite.run "curl -kLss #{manifestFile}", (error, data)->
@@ -73,12 +79,15 @@ class GitHub.Core.Connector
       
   getAppRepoIconFullURL: (appRepoName, callback)->
     appBase = "https://raw.github.com/#{@username}/#{appRepoName}/master/"
-    @readAppRepoManifest appRepoName, (error, manifest)->
-      
+    @readAppRepoManifest appRepoName, (error, manifest)=>
+      if typeof manifest is "string" then error = yes
       if error or not manifest
+        @readAppRepoOldManifest appRepoName, (error, manifest)->
+          iconPath = manifest?.icns?["128"]
+          callback "#{appBase}#{iconPath}", manifest
         return false
       
-      iconPath = manifest.icns["128"]
+      iconPath = manifest?.icns?["128"]
       callback "#{appBase}#{iconPath}", manifest
 
 
@@ -89,27 +98,30 @@ class GitHub.Core.CLI
   constructor: ()->
     @kite   = KD.getSingleton "kiteController"
     @finder = KD.getSingleton "finderController"
+    @vm     = KD.getSingleton "vmController"
     @tree   = @finder.treeController
 
   clone: (url, name, callback)->
-    root = "~/#{nickname}/GitHub"
+    root = "/home/#{nickname}/GitHub"
     path = "#{root}/#{name}"
+    defaultVM = @vm.getDefaultVmName()
     
     @kite.run "mkdir -p #{path}; git clone #{url} #{path}", =>
       KD.utils.wait 1000, => 
-        @tree.refreshFolder @tree.nodes["~/#{nickname}"]
+        @tree.refreshFolder @tree.nodes["[#{defaultVM}]/home/#{nickname}"]
       KD.utils.wait 1500, => 
-        @tree.refreshFolder @tree.nodes[root]
+        @tree.refreshFolder @tree.nodes["[#{defaultVM}]#{root}"]
       callback.apply @, arguments
 
   cloneAsApp: (url, name, callback)->
     # Clear the repo name.
     name = name.replace(/.kdapp$/, '')
-    root = "~/#{nickname}/Applications"
+    root = "/home/#{nickname}/Applications"
     path = "#{root}/#{name}.kdapp"
+    defaultVM = @vm.getDefaultVmName()
     
-    @kite.run "mkdir -p #{path}; git clone #{url} #{path}", =>
-      KD.utils.wait 1000, => 
-        @tree.refreshFolder @tree.nodes[root]
+    @kite.run "mkdir -p #{path}; git clone #{url} #{path}; mv #{path}/.manifest #{path}/manifest.json", =>
+      KD.utils.wait 1000, =>
+        @tree.refreshFolder @tree.nodes["[#{defaultVM}]#{root}"]
         KD.getSingleton('kodingAppsController').refreshApps()
       callback.apply @, arguments
