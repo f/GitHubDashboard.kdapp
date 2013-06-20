@@ -308,7 +308,6 @@ class GitHub.Views.MainView extends JView
                     name     : "root"
                     defaultValue: "/Users/#{nickname}/GitHub/"
                     disabled : yes
-                    tooltip  : "asd"
                   "Path":
                     label    : "Clone Path"
                     name     : "root"

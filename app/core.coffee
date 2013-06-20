@@ -99,18 +99,12 @@ class GitHub.Core.CLI
     @kite   = KD.getSingleton "kiteController"
     @finder = KD.getSingleton "finderController"
     @vm     = KD.getSingleton "vmController"
-    @tree   = @finder.treeController
 
   clone: (url, name, callback)->
     root = "/home/#{nickname}/GitHub"
     path = "#{root}/#{name}"
-    defaultVM = @vm.getDefaultVmName()
     
     @kite.run "mkdir -p #{path}; git clone #{url} #{path}", =>
-      KD.utils.wait 1000, => 
-        @tree.refreshFolder @tree.nodes["[#{defaultVM}]/home/#{nickname}"]
-      KD.utils.wait 1500, => 
-        @tree.refreshFolder @tree.nodes["[#{defaultVM}]#{root}"]
       callback.apply @, arguments
 
   cloneAsApp: (url, name, callback)->
@@ -118,10 +112,7 @@ class GitHub.Core.CLI
     name = name.replace(/.kdapp$/, '')
     root = "/home/#{nickname}/Applications"
     path = "#{root}/#{name}.kdapp"
-    defaultVM = @vm.getDefaultVmName()
     
     @kite.run "mkdir -p #{path}; git clone #{url} #{path}; mv #{path}/.manifest #{path}/manifest.json", =>
-      KD.utils.wait 1000, =>
-        @tree.refreshFolder @tree.nodes["[#{defaultVM}]#{root}"]
-        KD.getSingleton('kodingAppsController').refreshApps()
+      KD.getSingleton('kodingAppsController').refreshApps()
       callback.apply @, arguments
