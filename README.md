@@ -1,5 +1,8 @@
 # GitHub Dashboard for Koding v0.2
 
+[![Clone in Koding](http://kbutton.org/app.png)](http://kbutton.org/f/GitHubDashboard.kdapp)
+
+
 COOL INFO: THIS APPLICATION COMPLETELY DEVELOPED/DESIGNED/TESTED ON KODING. DAMN COOL!
 
 This is a simple GitHub Dashboard app for Koding users. Manages the applications and the repositories
