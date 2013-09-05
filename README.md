@@ -1,6 +1,6 @@
 # GitHub Dashboard for Koding v0.2
 
-[![Clone in Koding](http://kbutton.org/app.png)](http://kbutton.org/f/GitHubDashboard.kdapp)
+[![Clone in Koding](http://kbutton.org/app.png?v1)](http://kbutton.org/f/GitHubDashboard.kdapp)
 
 
 COOL INFO: THIS APPLICATION COMPLETELY DEVELOPED/DESIGNED/TESTED ON KODING. DAMN COOL!
